@@ -16,6 +16,14 @@ import OrderSummary from '../components/checkout/OrderSummary';
 import OrderConfirmation from '../components/checkout/OrderConfirmation';
 import { toast } from 'react-hot-toast';
 
+interface CartItem {
+  productId: number;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
+
 const Checkout = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -74,7 +82,7 @@ const Checkout = () => {
         return (
           <div className="space-y-8">
             <PaymentForm onSubmit={handlePaymentSubmit} />
-            <OrderSummary items={items} total={total} />
+            <OrderSummary items={items as CartItem[]} total={total} />
           </div>
         );
       case 3:

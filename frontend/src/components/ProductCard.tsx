@@ -1,85 +1,56 @@
-import { Link } from 'react-router-dom';
-import { StarIcon } from '@heroicons/react/24/solid';
-import { ShoppingCartIcon } from '@heroicons/react/24/outline';
+import React from 'react';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { addToCart } from '../features/cart/cartSlice';
-import { Product } from '../services/api';
-import toast from 'react-hot-toast';
+import { Product } from '../types';
 
 interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
 
   const handleAddToCart = () => {
-    dispatch(
-      addToCart({
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        image: product.thumbnail,
-        stock: product.stock,
-        quantity: 1,
-      })
-    );
-    toast.success('Added to cart');
+    dispatch(addToCart({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.image
+    }));
   };
 
   return (
-    <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200">
-      <Link to={`/product/${product.id}`} className="block">
-        <div className="w-full aspect-w-1 aspect-h-1 bg-gray-200 rounded-t-lg overflow-hidden">
-          <img
-            src={product.thumbnail}
-            alt={product.title}
-            className="w-full h-full object-center object-cover group-hover:opacity-90 transition-opacity duration-200"
-          />
-        </div>
-        <div className="px-4 py-3">
-          <h3 className="text-sm font-medium text-gray-900 truncate">
-            {product.title}
-          </h3>
-          <div className="mt-1 flex items-center">
-            <div className="flex items-center">
-              {[0, 1, 2, 3, 4].map((rating) => (
-                <StarIcon
-                  key={rating}
-                  className={`${
-                    product.rating > rating ? 'text-yellow-400' : 'text-gray-200'
-                  } h-4 w-4 flex-shrink-0`}
-                />
-              ))}
-            </div>
-            <p className="ml-1 text-sm text-gray-500">({product.rating})</p>
-          </div>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="text-lg font-medium text-gray-900">
-              ${product.price.toFixed(2)}
-            </p>
-            {product.discountPercentage > 0 && (
-              <span className="text-sm text-red-600 font-medium">
-                -{Math.round(product.discountPercentage)}% OFF
-              </span>
-            )}
-          </div>
-          <p className="mt-1 text-sm text-gray-500">{product.brand}</p>
-        </div>
+    <div className="bg-white rounded-lg shadow overflow-hidden">
+      <Link to={`/product/${product.id}`}>
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-48 object-cover"
+        />
       </Link>
-      <div className="px-4 pb-3">
-        <button
-          onClick={handleAddToCart}
-          disabled={product.stock === 0}
-          className={`w-full flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium ${
-            product.stock === 0
-              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              : 'bg-indigo-600 text-white hover:bg-indigo-700'
-          }`}
-        >
-          <ShoppingCartIcon className="h-5 w-5 mr-2" />
-          {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-        </button>
+      
+      <div className="p-4">
+        <Link to={`/product/${product.id}`}>
+          <h3 className="text-lg font-semibold mb-2 hover:text-blue-600">
+            {product.name}
+          </h3>
+        </Link>
+        
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          {product.description}
+        </p>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
+          <button
+            onClick={handleAddToCart}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          >
+            Add to Cart
+          </button>
+        </div>
       </div>
     </div>
   );

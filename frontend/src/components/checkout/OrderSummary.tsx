@@ -1,14 +1,19 @@
+import React from 'react';
 import { CartItem } from '../../types';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../types';
 
 interface OrderSummaryProps {
   items: CartItem[];
   total: number;
 }
 
-const OrderSummary: React.FC<OrderSummaryProps> = ({ items, total }) => {
-  const subtotal = total;
+const OrderSummary: React.FC<OrderSummaryProps> = () => {
+  const { items, total } = useSelector((state: RootState) => state.cart);
+
+  const subtotal = total || 0;
   const shipping = 0; // Free shipping for now
-  const tax = total * 0.1; // 10% tax
+  const tax = subtotal * 0.1; // 10% tax
   const finalTotal = subtotal + shipping + tax;
 
   return (

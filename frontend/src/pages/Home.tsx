@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { fetchProducts } from '../features/products/productSlice';
+import { RootState } from '../types';
 import ProductCard from '../components/ProductCard';
-import { fetchFeaturedProducts } from '../features/products/productSlice';
-import { AppDispatch, RootState } from '../store';
-import { Product } from '../services/api';
 
 const categories = [
   {
@@ -27,15 +26,29 @@ const categories = [
   },
 ];
 
-const Home = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { featuredProducts, loading } = useSelector(
-    (state: RootState) => state.products
-  );
+const Home: React.FC = () => {
+  const dispatch = useDispatch();
+  const { products, loading, error } = useSelector((state: RootState) => state.products);
 
   useEffect(() => {
-    dispatch(fetchFeaturedProducts());
+    dispatch(fetchProducts({ limit: 6 })); // Fetch featured products
   }, [dispatch]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-red-500 text-center">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-12">
@@ -73,22 +86,11 @@ const Home = () => {
         <h2 className="text-3xl font-extrabold text-gray-900 mb-6">
           Featured Products
         </h2>
-        {loading ? (
-          <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-            {[...Array(4)].map((_, index) => (
-              <div
-                key={`skeleton-${index}`}
-                className="animate-pulse bg-gray-200 rounded-lg h-64"
-              ></div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-            {featuredProducts.map((product: Product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+          {products.slice(0, 6).map((product: any) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       </div>
 
       {/* Categories */}

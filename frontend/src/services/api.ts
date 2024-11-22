@@ -1,6 +1,41 @@
 import axios from 'axios';
+import { ApiError } from '../types';
 
 const API_BASE_URL = 'https://dummyjson.com';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || 'An unexpected error occurred',
+      statusCode: error.response?.status || 500,
+    };
+    return Promise.reject(apiError);
+  }
+);
 
 export interface Product {
   id: number;
@@ -41,14 +76,14 @@ interface Category {
 export const getProducts = async (params: ProductParams = {}) => {
   try {
     const { skip = 0, limit = 20, category } = params;
-    let url = `${API_BASE_URL}/products`;
+    let url = '/products';
 
     // If category is provided, use the category-specific endpoint
     if (category) {
-      url = `${API_BASE_URL}/products/category/${encodeURIComponent(category)}`;
+      url = `/products/category/${encodeURIComponent(category)}`;
     }
 
-    const response = await axios.get<ProductsResponse>(url, {
+    const response = await api.get<ProductsResponse>(url, {
       params: {
         skip,
         limit,
@@ -69,7 +104,7 @@ export const getProducts = async (params: ProductParams = {}) => {
 
 export const getProduct = async (id: string) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/products/${id}`);
+    const response = await api.get(`/products/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching product:', error);
@@ -79,7 +114,7 @@ export const getProduct = async (id: string) => {
 
 export const searchProducts = async (query: string) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/products/search`, {
+    const response = await api.get('/products/search', {
       params: { q: query },
     });
     return response.data;
@@ -91,7 +126,7 @@ export const searchProducts = async (query: string) => {
 
 export const getCategories = async (): Promise<Category[]> => {
   try {
-    const response = await axios.get<Category[]>(`${API_BASE_URL}/products/categories`);
+    const response = await api.get('/products/categories');
     return response.data;
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -102,7 +137,7 @@ export const getCategories = async (): Promise<Category[]> => {
 export const getFeaturedProducts = async () => {
   try {
     // Get products with high ratings and stock
-    const response = await axios.get(`${API_BASE_URL}/products`, {
+    const response = await api.get('/products', {
       params: {
         limit: 8,
         skip: 0,
@@ -114,3 +149,5 @@ export const getFeaturedProducts = async () => {
     throw error;
   }
 };
+
+export { api };
