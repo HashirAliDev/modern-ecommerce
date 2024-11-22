@@ -1,14 +1,13 @@
-import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { TrashIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { RootState, AppDispatch, CartItem } from '../types';
 import { removeFromCart, updateQuantity, clearCart, loadCart } from '../features/cart/cartSlice';
-import { RootState } from '../store';
 import { formatPrice } from '../utils/formatPrice';
 
-const Cart = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+const Cart: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = React.useNavigate();
   const { items, total, itemsCount } = useSelector((state: RootState) => state.cart);
 
   useEffect(() => {
@@ -34,132 +33,107 @@ const Cart = () => {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-            Your cart is empty
-          </h2>
-          <p className="mt-4 text-lg text-gray-500">
-            Looks like you haven't added any items to your cart yet.
-          </p>
-          <div className="mt-6">
-            <Link
-              to="/products"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Continue Shopping
-            </Link>
-          </div>
+          <h2 className="text-2xl font-bold mb-4">Your Cart is Empty</h2>
+          <p className="text-gray-600 mb-6">Add some items to your cart to get started!</p>
+          <Link
+            to="/products"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Continue Shopping
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl mb-8">
-        Shopping Cart
-      </h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8">
-          <div className="border-t border-gray-200 divide-y divide-gray-200">
-            {items.map((item) => (
-              <div key={`cart-item-${item._id}`} className="py-6 flex">
-                <div className="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-center object-cover"
-                  />
-                </div>
-
-                <div className="ml-4 flex-1 flex flex-col">
-                  <div>
-                    <div className="flex justify-between text-base font-medium text-gray-900">
-                      <h3>
-                        <Link to={`/products/${item._id}`}>{item.name}</Link>
-                      </h3>
-                      <p className="ml-4">{formatPrice(item.price * item.quantity)}</p>
-                    </div>
-                  </div>
-                  <div className="flex-1 flex items-end justify-between text-sm">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
-                        className="p-1 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={item.quantity <= 1}
-                      >
-                        <MinusIcon className="h-4 w-4" />
-                      </button>
-                      <span className="font-medium text-gray-500 w-8 text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
-                        className="p-1 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={item.quantity >= item.stock}
-                      >
-                        <PlusIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    <div className="flex">
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveItem(item._id)}
-                        className="font-medium text-indigo-600 hover:text-indigo-500"
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Cart Items */}
+        <div className="lg:col-span-2">
+          {items.map((item) => (
+            <div
+              key={item._id}
+              className="flex items-center border-b border-gray-200 py-4 last:border-b-0"
+            >
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-24 h-24 object-cover rounded"
+              />
+              <div className="flex-grow ml-4">
+                <h3 className="text-lg font-semibold">{item.name}</h3>
+                <p className="text-gray-600">{formatPrice(item.price)}</p>
+                <div className="flex items-center mt-2">
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(item._id, Math.max(1, item.quantity - 1))
+                    }
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    -
+                  </button>
+                  <span className="mx-4">{item.quantity}</span>
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(item._id, item.quantity + 1)
+                    }
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={handleClearCart}
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Clear Cart
-            </button>
-          </div>
+              <div className="text-right">
+                <p className="text-lg font-semibold">
+                  {formatPrice(item.price * item.quantity)}
+                </p>
+                <button
+                  onClick={() => handleRemoveItem(item._id)}
+                  className="text-red-500 hover:text-red-700 mt-2"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="lg:col-span-4">
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
-            <div className="flow-root">
-              <dl className="-my-4 text-sm divide-y divide-gray-200">
-                <div key="subtotal" className="py-4 flex items-center justify-between">
-                  <dt className="text-gray-600">Subtotal</dt>
-                  <dd className="font-medium text-gray-900">{formatPrice(total)}</dd>
-                </div>
-                <div key="items-count" className="py-4 flex items-center justify-between">
-                  <dt className="text-gray-600">Items</dt>
-                  <dd className="font-medium text-gray-900">{itemsCount}</dd>
-                </div>
-                <div key="order-total" className="py-4 flex items-center justify-between">
-                  <dt className="text-base font-medium text-gray-900">Order total</dt>
-                  <dd className="text-base font-medium text-gray-900">{formatPrice(total)}</dd>
-                </div>
-              </dl>
+        {/* Order Summary */}
+        <div className="bg-gray-50 p-6 rounded-lg h-fit">
+          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{formatPrice(total)}</span>
             </div>
-
-            <div className="mt-6">
-              <button
-                type="button"
-                onClick={handleCheckout}
-                className="w-full bg-indigo-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
-              >
-                Checkout
-              </button>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>Free</span>
+            </div>
+            <div className="border-t border-gray-200 pt-2 mt-2">
+              <div className="flex justify-between font-semibold">
+                <span>Total</span>
+                <span>{formatPrice(total)}</span>
+              </div>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={handleClearCart}
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 mb-4"
+          >
+            Clear Cart
+          </button>
+          <Link
+            to="/checkout"
+            className="block w-full bg-blue-600 text-white text-center px-4 py-2 rounded-lg mt-2 hover:bg-blue-700 transition-colors"
+          >
+            Proceed to Checkout
+          </Link>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchProducts } from '../features/products/productSlice';
-import { RootState } from '../types';
+import { RootState, AppDispatch } from '../types';
 import ProductCard from '../components/ProductCard';
 
 const categories = [
@@ -27,7 +27,7 @@ const categories = [
 ];
 
 const Home: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const { products, loading, error } = useSelector((state: RootState) => state.products);
 
   useEffect(() => {

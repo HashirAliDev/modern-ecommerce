@@ -1,108 +1,68 @@
-import { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { ShoppingCartIcon, UserIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import SearchBar from './SearchBar';
-import { RootState } from '../store';
+import { RootState } from '../types';
 
-const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const itemsCount = useSelector((state: RootState) => state.cart.itemsCount);
+const Navbar: React.FC = () => {
+  const { items } = useSelector((state: RootState) => state.cart);
+  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white shadow-md">
+      <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex-shrink-0 flex items-center">
-            <span className="text-2xl font-bold text-gray-900">ModernShop</span>
+          <Link to="/" className="text-xl font-bold text-blue-600">
+            Modern E-commerce
           </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 mx-8 hidden sm:block">
-            <SearchBar />
-          </div>
-
-          {/* Navigation Links */}
           <div className="flex items-center space-x-4">
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                to="/products"
-                className="text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
+            <Link to="/products" className="text-gray-700 hover:text-blue-600">
+              Products
+            </Link>
+            <Link to="/categories" className="text-gray-700 hover:text-blue-600">
+              Categories
+            </Link>
+            <Link to="/deals" className="text-gray-700 hover:text-blue-600">
+              Deals
+            </Link>
+            <Link to="/cart" className="relative text-gray-700 hover:text-blue-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                Products
-              </Link>
-              <Link
-                to="/categories"
-                className="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Categories
-              </Link>
-              <Link
-                to="/deals"
-                className="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Deals
-              </Link>
-            </div>
-            <Link
-              to="/cart"
-              className="p-2 text-gray-500 hover:text-gray-900 relative"
-            >
-              <ShoppingCartIcon className="h-6 w-6" />
-              {itemsCount > 0 && (
-                <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-indigo-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                  {itemsCount}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {itemCount}
                 </span>
               )}
             </Link>
-            <Link
-              to="/account"
-              className="p-2 text-gray-500 hover:text-gray-900 ml-4"
-            >
-              <UserIcon className="h-6 w-6" />
-            </Link>
-
-            {/* Mobile menu button */}
-            <div className="flex items-center sm:hidden ml-4">
-              <button
-                type="button"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+            <Link to="/account" className="text-gray-700 hover:text-blue-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <span className="sr-only">Open main menu</span>
-                {isMenuOpen ? (
-                  <XMarkIcon className="block h-6 w-6" />
-                ) : (
-                  <Bars3Icon className="block h-6 w-6" />
-                )}
-              </button>
-            </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </Link>
           </div>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      <div className={`sm:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
-        <div className="pt-2 pb-3 space-y-1">
-          <Link
-            to="/products"
-            className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-indigo-500 text-indigo-700 bg-indigo-50"
-          >
-            Products
-          </Link>
-          <Link
-            to="/categories"
-            className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-          >
-            Categories
-          </Link>
-          <Link
-            to="/deals"
-            className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-          >
-            Deals
-          </Link>
         </div>
       </div>
     </nav>
