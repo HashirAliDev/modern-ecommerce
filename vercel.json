@@ -2,7 +2,6 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
-  "description": "Modern E-commerce with GitHub webhook integration",
   "rewrites": [
     {
       "source": "/api/(.*)",
