@@ -13,16 +13,18 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: [
-    'https://modern-ecommerce-qvnzb81uz-hashiralidevs-projects.vercel.app',
-    'http://localhost:3000'
-  ],
+// CORS configuration
+const corsOptions = {
+  origin: ['https://modern-ecommerce-qvnzb81uz-hashiralidevs-projects.vercel.app', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range']
+};
+
+// Middleware
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Enable pre-flight for all routes
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
