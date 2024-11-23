@@ -1,24 +1,44 @@
-import { store } from '../store';
+import { store } from '../app/store';
 
-export type RootState = ReturnType<typeof store.getState>;
+// Redux Store Types
 export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof store.getState>;
 
+// Product Types
 export interface Product {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
   category: string;
+  imageUrl: string;
   stock: number;
+  brand: string;
+  discountPercentage?: number;
   rating: number;
-  reviews: number;
+  reviews: Review[];
   createdAt: string;
   updatedAt: string;
 }
 
+export interface Review {
+  _id: string;
+  userId: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface ProductsResponse {
+  products: Product[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// Cart Types
 export interface CartItem {
-  id: string;
+  _id: string;
   productId: string;
   name: string;
   price: number;
@@ -26,20 +46,37 @@ export interface CartItem {
   imageUrl: string;
 }
 
+export interface CartState {
+  items: CartItem[];
+  total: number;
+  itemsCount: number;
+  loading: boolean;
+  error: string | null;
+}
+
+// User Types
 export interface User {
-  id: string;
-  email: string;
+  _id: string;
   name: string;
+  email: string;
   role: 'user' | 'admin';
 }
 
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+  error: string | null;
+}
+
+// Order Types
 export interface Order {
-  id: string;
+  _id: string;
   userId: string;
   items: CartItem[];
   total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   shippingAddress: Address;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
   createdAt: string;
 }
 
@@ -51,60 +88,28 @@ export interface Address {
   zipCode: string;
 }
 
-export interface ProductsResponse {
-  products: Product[];
-  totalPages: number;
-  currentPage: number;
+// Filter Types
+export interface FilterState {
+  category: string;
+  priceRange: [number, number];
+  sort: string;
+  search: string;
 }
 
+// API Types
 export interface ApiError {
   message: string;
-  statusCode: number;
+  status: number;
 }
 
-export interface ProductParams {
-  search?: string;
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sort?: string;
-  limit?: number;
-  skip?: number;
-  offset?: number;
-}
-
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  loading: boolean;
-  error: string | null;
-}
-
-export interface CartState {
-  items: CartItem[];
-  total: number;
-  loading: boolean;
-  error: string | null;
-}
-
-export interface ProductState {
-  products: Product[];
-  total: number;
-  loading: boolean;
-  error: string | null;
-  selectedProduct: Product | null;
-}
-
-export interface CheckoutState {
-  order: Order | null;
-  loading: boolean;
-  error: string | null;
-  step: number;
-}
-
-export interface RootState {
-  auth: AuthState;
-  cart: CartState;
-  products: ProductState;
-  checkout: CheckoutState;
+// Async Thunk Types
+export interface AsyncThunkConfig {
+  state: RootState;
+  dispatch: AppDispatch;
+  extra?: unknown;
+  rejectValue: ApiError;
+  serializedErrorType?: unknown;
+  pendingMeta?: unknown;
+  fulfilledMeta?: unknown;
+  rejectedMeta?: unknown;
 }

@@ -1,30 +1,23 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { RootState, AppDispatch, CartItem } from '../types';
-import { removeFromCart, updateQuantity, clearCart, loadCart } from '../features/cart/cartSlice';
-import { formatPrice } from '../utils/formatPrice';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../types';
+import { removeFromCart, updateQuantity } from '../features/cart/cartSlice';
+import { FaTrash } from 'react-icons/fa';
 
 const Cart: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const navigate = React.useNavigate();
-  const { items, total, itemsCount } = useSelector((state: RootState) => state.cart);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { items, total } = useSelector((state: RootState) => state.cart);
 
-  useEffect(() => {
-    dispatch(loadCart());
-  }, [dispatch]);
-
-  const handleQuantityChange = (id: string, quantity: number) => {
-    if (quantity < 1) return;
-    dispatch(updateQuantity({ id, quantity }));
+  const handleQuantityChange = (itemId: string, newQuantity: number) => {
+    if (newQuantity > 0) {
+      dispatch(updateQuantity({ itemId, quantity: newQuantity }));
+    }
   };
 
-  const handleRemoveItem = (id: string) => {
-    dispatch(removeFromCart(id));
-  };
-
-  const handleClearCart = () => {
-    dispatch(clearCart());
+  const handleRemoveItem = (itemId: string) => {
+    dispatch(removeFromCart(itemId));
   };
 
   const handleCheckout = () => {
@@ -34,15 +27,15 @@ const Cart: React.FC = () => {
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Your Cart is Empty</h2>
-          <p className="text-gray-600 mb-6">Add some items to your cart to get started!</p>
-          <Link
-            to="/products"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+        <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
+        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">Your cart is empty</p>
+          <button
+            onClick={() => navigate('/products')}
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
           >
             Continue Shopping
-          </Link>
+          </button>
         </div>
       </div>
     );
@@ -50,91 +43,60 @@ const Cart: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Cart Items */}
-        <div className="lg:col-span-2">
-          {items.map((item) => (
-            <div
-              key={item._id}
-              className="flex items-center border-b border-gray-200 py-4 last:border-b-0"
-            >
+      <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
+      <div className="grid grid-cols-1 gap-4">
+        {items.map((item) => (
+          <div
+            key={item._id}
+            className="flex items-center justify-between p-4 border rounded"
+          >
+            <div className="flex items-center space-x-4">
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-24 h-24 object-cover rounded"
+                className="w-20 h-20 object-cover rounded"
               />
-              <div className="flex-grow ml-4">
-                <h3 className="text-lg font-semibold">{item.name}</h3>
-                <p className="text-gray-600">{formatPrice(item.price)}</p>
-                <div className="flex items-center mt-2">
-                  <button
-                    onClick={() =>
-                      handleQuantityChange(item._id, Math.max(1, item.quantity - 1))
-                    }
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    -
-                  </button>
-                  <span className="mx-4">{item.quantity}</span>
-                  <button
-                    onClick={() =>
-                      handleQuantityChange(item._id, item.quantity + 1)
-                    }
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    +
-                  </button>
-                </div>
+              <div>
+                <h3 className="font-semibold">{item.name}</h3>
+                <p className="text-gray-600">${item.price.toFixed(2)}</p>
               </div>
-              <div className="text-right">
-                <p className="text-lg font-semibold">
-                  {formatPrice(item.price * item.quantity)}
-                </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => handleRemoveItem(item._id)}
-                  className="text-red-500 hover:text-red-700 mt-2"
+                  onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
+                  className="px-2 py-1 border rounded"
                 >
-                  Remove
+                  -
+                </button>
+                <span>{item.quantity}</span>
+                <button
+                  onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
+                  className="px-2 py-1 border rounded"
+                >
+                  +
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Order Summary */}
-        <div className="bg-gray-50 p-6 rounded-lg h-fit">
-          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>{formatPrice(total)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping</span>
-              <span>Free</span>
-            </div>
-            <div className="border-t border-gray-200 pt-2 mt-2">
-              <div className="flex justify-between font-semibold">
-                <span>Total</span>
-                <span>{formatPrice(total)}</span>
-              </div>
+              <button
+                onClick={() => handleRemoveItem(item._id)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <FaTrash />
+              </button>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleClearCart}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 mb-4"
-          >
-            Clear Cart
-          </button>
-          <Link
-            to="/checkout"
-            className="block w-full bg-blue-600 text-white text-center px-4 py-2 rounded-lg mt-2 hover:bg-blue-700 transition-colors"
-          >
-            Proceed to Checkout
-          </Link>
+        ))}
+      </div>
+      <div className="mt-8 flex justify-between items-center">
+        <div className="text-xl font-semibold">
+          Total: ${total.toFixed(2)}
         </div>
+        <button
+          onClick={handleCheckout}
+          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        >
+          Proceed to Checkout
+        </button>
       </div>
     </div>
   );

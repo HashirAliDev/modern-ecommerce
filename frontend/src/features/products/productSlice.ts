@@ -1,40 +1,30 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { Product, ProductsResponse } from '../../types';
-import { api } from '../../services/api';
+import { Product, ProductsResponse, ApiError, RootState } from '../../types';
+import axios from 'axios';
 
 interface ProductsState {
   products: Product[];
+  currentProduct: Product | null;
   loading: boolean;
   error: string | null;
-  currentPage: number;
-  totalPages: number;
-  filters: {
-    category: string | null;
-    search: string;
-    minPrice: number;
-    maxPrice: number;
-    sort: string;
-  };
+  total: number;
+  page: number;
+  limit: number;
 }
 
 const initialState: ProductsState = {
   products: [],
+  currentProduct: null,
   loading: false,
   error: null,
-  currentPage: 1,
-  totalPages: 1,
-  filters: {
-    category: null,
-    search: '',
-    minPrice: 0,
-    maxPrice: 10000,
-    sort: 'newest',
-  },
+  total: 0,
+  page: 1,
+  limit: 12,
 };
 
-export const fetchProducts = createAsyncThunk(
-  'products/fetchProducts',
-  async (params: {
+export const fetchProducts = createAsyncThunk<
+  ProductsResponse,
+  {
     page?: number;
     limit?: number;
     category?: string;
@@ -42,26 +32,67 @@ export const fetchProducts = createAsyncThunk(
     minPrice?: number;
     maxPrice?: number;
     sort?: string;
-  }) => {
-    const response = await api.get<ProductsResponse>('/products', { params });
-    return response.data;
+  },
+  { rejectValue: ApiError }
+>('products/fetchProducts', async (params, { rejectWithValue }) => {
+  try {
+    const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/products`, {
+      params,
+    });
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data as ApiError);
+    }
+    throw error;
   }
-);
+});
 
-const productSlice = createSlice({
+export const fetchProductById = createAsyncThunk<
+  Product,
+  string,
+  { rejectValue: ApiError }
+>('products/fetchProductById', async (productId, { rejectWithValue }) => {
+  try {
+    const { data } = await axios.get(
+      `${import.meta.env.VITE_API_URL}/products/${productId}`
+    );
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data as ApiError);
+    }
+    throw error;
+  }
+});
+
+export const searchProducts = createAsyncThunk<
+  ProductsResponse,
+  string,
+  { rejectValue: ApiError }
+>('products/searchProducts', async (query, { rejectWithValue }) => {
+  try {
+    const { data } = await axios.get(
+      `${import.meta.env.VITE_API_URL}/products/search`,
+      {
+        params: { q: query },
+      }
+    );
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data as ApiError);
+    }
+    throw error;
+  }
+});
+
+const productsSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
-    setCurrentPage: (state, action) => {
-      state.currentPage = action.payload;
-    },
-    setFilters: (state, action) => {
-      state.filters = { ...state.filters, ...action.payload };
-      state.currentPage = 1; // Reset to first page when filters change
-    },
-    clearFilters: (state) => {
-      state.filters = initialState.filters;
-      state.currentPage = 1;
+    clearCurrentProduct: (state) => {
+      state.currentProduct = null;
     },
   },
   extraReducers: (builder) => {
@@ -73,14 +104,49 @@ const productSlice = createSlice({
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload.products;
-        state.totalPages = action.payload.totalPages;
+        state.total = action.payload.total;
+        state.page = action.payload.page;
+        state.limit = action.payload.limit;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch products';
+        state.error = action.payload?.message || 'Failed to fetch products';
+      })
+      .addCase(fetchProductById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentProduct = action.payload;
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to fetch product';
+      })
+      .addCase(searchProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = action.payload.products;
+        state.total = action.payload.total;
+      })
+      .addCase(searchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to search products';
       });
   },
 });
 
-export const { setCurrentPage, setFilters, clearFilters } = productSlice.actions;
-export default productSlice.reducer;
+export const { clearCurrentProduct } = productsSlice.actions;
+
+export const selectProducts = (state: RootState) => state.products.products;
+export const selectCurrentProduct = (state: RootState) =>
+  state.products.currentProduct;
+export const selectProductsLoading = (state: RootState) => state.products.loading;
+export const selectProductsError = (state: RootState) => state.products.error;
+export const selectProductsTotal = (state: RootState) => state.products.total;
+
+export default productsSlice.reducer;
