@@ -18,26 +18,23 @@ export interface ApiResponse<T> {
 
 // Product Types
 export interface Product {
-  _id: string;
-  name: string;
+  id: number;
+  title: string;
   description: string;
   price: number;
-  imageUrl: string;
-  category: string;
-  brand: string;
-  stock: number;
+  discountPercentage: number;
   rating: number;
-  reviews: Review[];
-  images: string[];
-  discountPercentage?: number;
+  stock: number;
+  brand: string;
+  category: string;
   thumbnail: string;
-  title: string; // Alias for name, for compatibility
+  images: string[];
 }
 
 export interface ProductsResponse {
   products: Product[];
   total: number;
-  page: number;
+  skip: number;
   limit: number;
 }
 
@@ -111,13 +108,10 @@ export interface Address {
 
 // Filter Types
 export interface ProductFilters {
-  page?: number;
   limit?: number;
-  category?: string;
-  search?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sort?: string;
+  skip?: number;
+  select?: string;
+  q?: string;
 }
 
 // Redux Store Type

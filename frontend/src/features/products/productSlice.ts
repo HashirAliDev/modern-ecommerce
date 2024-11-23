@@ -26,8 +26,12 @@ export const fetchProducts = createAsyncThunk<
   try {
     console.log('Fetching products from:', `${import.meta.env.VITE_API_URL}/products`);
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/products`, { 
-      params,
-      timeout: 5000, // 5 second timeout
+      params: {
+        ...params,
+        limit: params.limit || 20,
+        skip: params.skip || 0
+      },
+      timeout: 5000
     });
     return response.data;
   } catch (error) {
@@ -85,14 +89,18 @@ export const fetchProductById = createAsyncThunk<
 
 export const searchProducts = createAsyncThunk<
   ProductsResponse,
-  ProductFilters,
+  { q: string } & ProductFilters,
   { rejectValue: ApiError }
 >('products/searchProducts', async (params, { rejectWithValue }) => {
   try {
     console.log('Searching products from:', `${import.meta.env.VITE_API_URL}/products/search`);
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/products/search`, { 
-      params,
-      timeout: 5000, // 5 second timeout
+      params: {
+        ...params,
+        limit: params.limit || 20,
+        skip: params.skip || 0
+      },
+      timeout: 5000
     });
     return response.data;
   } catch (error) {

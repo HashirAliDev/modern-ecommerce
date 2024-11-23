@@ -4,8 +4,16 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://modern-ecommerce-api.vercel.app/api/$1"
+      "source": "/api/products",
+      "destination": "https://dummyjson.com/products"
+    },
+    {
+      "source": "/api/products/:id",
+      "destination": "https://dummyjson.com/products/:id"
+    },
+    {
+      "source": "/api/products/search",
+      "destination": "https://dummyjson.com/products/search"
     },
     {
       "source": "/(.*)",
