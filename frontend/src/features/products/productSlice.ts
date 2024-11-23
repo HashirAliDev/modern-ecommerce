@@ -24,13 +24,30 @@ export const fetchProducts = createAsyncThunk<
   { rejectValue: ApiError }
 >('products/fetchProducts', async (params, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/products`, { params });
+    console.log('Fetching products from:', `${import.meta.env.VITE_API_URL}/products`);
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/products`, { 
+      params,
+      timeout: 5000, // 5 second timeout
+    });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return rejectWithValue(error.response.data as ApiError);
+    console.error('Error fetching products:', error);
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED') {
+        return rejectWithValue({ message: 'Request timed out. Please try again.' } as ApiError);
+      }
+      if (error.response) {
+        return rejectWithValue(error.response.data as ApiError);
+      }
+      if (error.request) {
+        return rejectWithValue({ 
+          message: 'No response received from server. Please check your connection.' 
+        } as ApiError);
+      }
     }
-    throw error;
+    return rejectWithValue({ 
+      message: 'Failed to fetch products. Please try again later.' 
+    } as ApiError);
   }
 });
 
@@ -40,13 +57,29 @@ export const fetchProductById = createAsyncThunk<
   { rejectValue: ApiError }
 >('products/fetchProductById', async (id, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/products/${id}`);
+    console.log('Fetching product by id from:', `${import.meta.env.VITE_API_URL}/products/${id}`);
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/products/${id}`, { 
+      timeout: 5000, // 5 second timeout
+    });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return rejectWithValue(error.response.data as ApiError);
+    console.error('Error fetching product by id:', error);
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED') {
+        return rejectWithValue({ message: 'Request timed out. Please try again.' } as ApiError);
+      }
+      if (error.response) {
+        return rejectWithValue(error.response.data as ApiError);
+      }
+      if (error.request) {
+        return rejectWithValue({ 
+          message: 'No response received from server. Please check your connection.' 
+        } as ApiError);
+      }
     }
-    throw error;
+    return rejectWithValue({ 
+      message: 'Failed to fetch product. Please try again later.' 
+    } as ApiError);
   }
 });
 
@@ -56,13 +89,30 @@ export const searchProducts = createAsyncThunk<
   { rejectValue: ApiError }
 >('products/searchProducts', async (params, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/products/search`, { params });
+    console.log('Searching products from:', `${import.meta.env.VITE_API_URL}/products/search`);
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/products/search`, { 
+      params,
+      timeout: 5000, // 5 second timeout
+    });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return rejectWithValue(error.response.data as ApiError);
+    console.error('Error searching products:', error);
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED') {
+        return rejectWithValue({ message: 'Request timed out. Please try again.' } as ApiError);
+      }
+      if (error.response) {
+        return rejectWithValue(error.response.data as ApiError);
+      }
+      if (error.request) {
+        return rejectWithValue({ 
+          message: 'No response received from server. Please check your connection.' 
+        } as ApiError);
+      }
     }
-    throw error;
+    return rejectWithValue({ 
+      message: 'Failed to search products. Please try again later.' 
+    } as ApiError);
   }
 });
 
