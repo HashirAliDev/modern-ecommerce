@@ -16,11 +16,20 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    minify: 'terser',
+    cssMinify: true,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@headlessui/react', '@heroicons/react'],
+        },
+      },
     },
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     port: 3000,
@@ -29,6 +38,7 @@ export default defineConfig({
         target: process.env.VITE_API_URL || 'http://localhost:5000',
         changeOrigin: true,
         rewrite: (path: string) => path.replace(/^\/api/, ''),
+        secure: false,
       },
     },
   },
