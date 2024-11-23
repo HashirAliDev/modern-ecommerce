@@ -1,71 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts } from '../features/products/productSlice';
 import { RootState } from '../types';
+import { fetchProducts } from '../features/products/productSlice';
 import ProductCard from '../components/ProductCard';
-import Filters from '../components/Filters';
-import Pagination from '../components/Pagination';
+import { Product } from '../types';
 
 const ProductList: React.FC = () => {
   const dispatch = useDispatch();
-  const { products, total, loading, error } = useSelector((state: RootState) => state.products);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [categories, setCategories] = useState<string[]>([]);
-  const itemsPerPage = 12;
+  const { items: products, loading, error } = useSelector(
+    (state: RootState) => state.products
+  );
 
   useEffect(() => {
-    // Fetch initial products
-    dispatch(fetchProducts({ limit: itemsPerPage, skip: (currentPage - 1) * itemsPerPage }));
-    
-    // Fetch categories
-    fetch(`${import.meta.env.VITE_API_URL}/categories`)
-      .then(res => res.json())
-      .then(data => setCategories(data))
-      .catch(err => console.error('Failed to fetch categories:', err));
-  }, [dispatch, currentPage]);
+    dispatch(
+      fetchProducts({
+        page: 1,
+        limit: 12,
+      })
+    );
+  }, [dispatch]);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    dispatch(fetchProducts({ limit: itemsPerPage, skip: (page - 1) * itemsPerPage }));
+  const handleLoadMore = () => {
+    dispatch(
+      fetchProducts({
+        page: Math.ceil(products.length / 12) + 1,
+        limit: 12,
+      })
+    );
   };
 
-  const handleFilterChange = (filters: { category?: string; minPrice?: number; maxPrice?: number }) => {
-    dispatch(fetchProducts({ ...filters, limit: itemsPerPage, skip: (currentPage - 1) * itemsPerPage }));
+  const handleFilterChange = (category: string) => {
+    dispatch(
+      fetchProducts({
+        page: 1,
+        limit: 12,
+        category,
+      })
+    );
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
+  if (loading && products.length === 0) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-red-500 text-xl">{error}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="w-full md:w-64">
-          <Filters categories={categories} onFilterChange={handleFilterChange} />
-        </div>
-        
-        <div className="flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          
-          {total > itemsPerPage && (
-            <div className="mt-8">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={Math.ceil(total / itemsPerPage)}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          )}
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Our Products</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {products.map((product: Product) => (
+          <ProductCard key={product._id} product={product} />
+        ))}
       </div>
+      {loading && (
+        <div className="flex justify-center mt-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+      {!loading && products.length > 0 && (
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={handleLoadMore}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Load More
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,17 +1,20 @@
 import { configureStore } from '@reduxjs/toolkit';
-import productsReducer from '../features/products/productSlice';
+import productReducer from '../features/products/productSlice';
 import cartReducer from '../features/cart/cartSlice';
 import authReducer from '../features/auth/authSlice';
 
 export const store = configureStore({
   reducer: {
-    products: productsReducer,
+    products: productReducer,
     cart: cartReducer,
     auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        // Ignore these action types
+        ignoredActions: ['persist/PERSIST'],
+      },
     }),
 });
 

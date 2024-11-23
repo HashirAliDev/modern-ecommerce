@@ -4,7 +4,6 @@ import { CartState, CartItem } from '../../types';
 const initialState: CartState = {
   items: [],
   total: 0,
-  itemsCount: 0,
   loading: false,
   error: null,
 };
@@ -15,46 +14,38 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action: PayloadAction<CartItem>) => {
       const existingItem = state.items.find(
-        (item) => item._id === action.payload._id
+        (item) => item.productId === action.payload.productId
       );
+
       if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
+        existingItem.quantity += 1;
       } else {
-        state.items.push(action.payload);
+        state.items.push({ ...action.payload });
       }
+
       state.total = state.items.reduce(
         (total, item) => total + item.price * item.quantity,
-        0
-      );
-      state.itemsCount = state.items.reduce(
-        (count, item) => count + item.quantity,
         0
       );
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter((item) => item._id !== action.payload);
+      state.items = state.items.filter((item) => item.productId !== action.payload);
       state.total = state.items.reduce(
         (total, item) => total + item.price * item.quantity,
-        0
-      );
-      state.itemsCount = state.items.reduce(
-        (count, item) => count + item.quantity,
         0
       );
     },
     updateQuantity: (
       state,
-      action: PayloadAction<{ itemId: string; quantity: number }>
+      action: PayloadAction<{ productId: string; quantity: number }>
     ) => {
-      const item = state.items.find((item) => item._id === action.payload.itemId);
+      const item = state.items.find(
+        (item) => item.productId === action.payload.productId
+      );
       if (item) {
         item.quantity = action.payload.quantity;
         state.total = state.items.reduce(
           (total, item) => total + item.price * item.quantity,
-          0
-        );
-        state.itemsCount = state.items.reduce(
-          (count, item) => count + item.quantity,
           0
         );
       }
@@ -62,7 +53,7 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
       state.total = 0;
-      state.itemsCount = 0;
+      state.error = null;
     },
   },
 });

@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { RootState } from '../types';
 import { fetchProducts } from '../features/products/productSlice';
-import { RootState, AppDispatch } from '../types';
 import ProductCard from '../components/ProductCard';
+import { Product } from '../types';
+import { FaArrowRight } from 'react-icons/fa';
 
 const categories = [
   {
@@ -27,78 +29,81 @@ const categories = [
 ];
 
 const Home: React.FC = () => {
-  const dispatch: AppDispatch = useDispatch();
-  const { products, loading, error } = useSelector((state: RootState) => state.products);
+  const dispatch = useDispatch();
+  const { items: products, loading, error } = useSelector(
+    (state: RootState) => state.products
+  );
 
   useEffect(() => {
-    dispatch(fetchProducts({ limit: 6 })); // Fetch featured products
+    dispatch(
+      fetchProducts({
+        limit: 8,
+        page: 1,
+      })
+    );
   }, [dispatch]);
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-red-500 text-center">{error}</div>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-red-500 text-xl">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-12">
+    <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
-      <div className="relative">
-        <div className="absolute inset-0">
-          <img
-            className="w-full h-full object-cover"
-            src="https://images.unsplash.com/photo-1472851294608-062f824d29cc"
-            alt="Hero background"
-          />
-          <div className="absolute inset-0 bg-gray-900 opacity-75"></div>
-        </div>
-        <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Modern E-Commerce
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 mb-12 text-white">
+        <div className="max-w-2xl">
+          <h1 className="text-4xl font-bold mb-4">
+            Welcome to Modern E-Commerce
           </h1>
-          <p className="mt-6 text-xl text-gray-300 max-w-3xl">
-            Discover our curated collection of premium products. Shop with
-            confidence and enjoy a seamless shopping experience.
+          <p className="text-lg mb-6">
+            Discover amazing products at great prices. Shop with confidence and
+            enjoy our fast delivery service.
           </p>
-          <div className="mt-10">
-            <Link
-              to="/products"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-black bg-white hover:bg-gray-50"
-            >
-              Shop Now
-            </Link>
-          </div>
+          <Link
+            to="/products"
+            className="inline-flex items-center bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+          >
+            Shop Now
+            <FaArrowRight className="ml-2" />
+          </Link>
         </div>
       </div>
 
       {/* Featured Products */}
-      <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-6">
-          Featured Products
-        </h2>
-        <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-          {products.slice(0, 6).map((product: any) => (
-            <ProductCard key={product.id} product={product} />
+      <div className="mb-12">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Featured Products</h2>
+          <Link
+            to="/products"
+            className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center"
+          >
+            View All
+            <FaArrowRight className="ml-2" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.slice(0, 4).map((product: Product) => (
+            <ProductCard key={product._id} product={product} />
           ))}
         </div>
       </div>
 
       {/* Categories */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-6">
-          Shop by Category
-        </h2>
-        <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Shop by Category</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {categories.map((category) => (
             <div
               key={category.id}
@@ -127,6 +132,28 @@ const Home: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Deals Section */}
+      <div>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Hot Deals</h2>
+          <Link
+            to="/deals"
+            className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center"
+          >
+            View All Deals
+            <FaArrowRight className="ml-2" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products
+            .filter((product) => product.discountPercentage)
+            .slice(0, 4)
+            .map((product: Product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
         </div>
       </div>
     </div>
