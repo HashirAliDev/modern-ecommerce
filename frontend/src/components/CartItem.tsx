@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { FaTrash, FaMinus, FaPlus } from 'react-icons/fa';
 import {
   removeFromCart,
-  updateCartItemQuantity,
+  updateQuantity,
 } from '../features/cart/cartSlice';
 import { CartItem as CartItemType } from '../types';
 
@@ -20,7 +20,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
   const handleUpdateQuantity = (newQuantity: number) => {
     if (newQuantity > 0 && newQuantity <= item.product.stock) {
-      dispatch(updateCartItemQuantity({ itemId: item._id, quantity: newQuantity }));
+      dispatch(updateQuantity({ productId: item._id, quantity: newQuantity }));
     }
   };
 
