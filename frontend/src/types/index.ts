@@ -2,7 +2,6 @@ import { store } from '../app/store';
 
 // Redux Store Types
 export type AppDispatch = typeof store.dispatch;
-export type RootState = ReturnType<typeof store.getState>;
 
 // API Types
 export interface ApiError {

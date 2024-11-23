@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ApiError } from '../types';
 
-const API_BASE_URL = 'https://dummyjson.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://modern-ecommerce-api.vercel.app';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
