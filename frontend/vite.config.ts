@@ -16,8 +16,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-    minify: false,
-    cssMinify: false,
+    minify: 'terser',
+    cssMinify: true,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
