@@ -15,7 +15,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: ['https://modern-ecommerce-pink.vercel.app', 'https://modern-ecommerce-qvnzb81uz-hashiralidevs-projects.vercel.app', 'http://localhost:3000'],
+  origin: ['https://modern-ecommerce-pink.vercel.app', 'https://modern-ecommerce-hnjo2s7ov-hashiralidevs-projects.vercel.app', 'https://modern-ecommerce-qvnzb81uz-hashiralidevs-projects.vercel.app', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
